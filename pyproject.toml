@@ -1,0 +1,51 @@
+[project]
+name = "phortinize"
+version = "0.1.0"
+description = "Photo cataloguer and metadata assistant."
+readme = "README.md"
+license = "MIT"
+authors = [
+    { name = "Scott Mills", email = "scottmills306@gmail.com" },
+]
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+phortinize = "phortinize:main"
+
+[build-system]
+requires = ["uv_build>=0.11.17,<0.12.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest==8.4.1",
+    "ruff==0.12.4",
+]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 88
+src = ["src"]
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "D",      # docs are Phase 4
+    "COM812", # conflicts with formatter
+    "ISC001", # conflicts with formatter
+]
+
+[tool.ruff.lint.per-file-ignores]
+"src/phortinize/__init__.py" = ["T201"]
+"src/phortinize/__main__.py" = ["T201"]
+"tests/**/*.py" = ["S101"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
