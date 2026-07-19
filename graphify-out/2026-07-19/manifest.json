@@ -1,0 +1,27 @@
+{
+  "pyproject.toml": {
+    "mtime": 1784491864.8831222,
+    "ast_hash": "6b7101a4efef714fc00c5d5f835f1f7b",
+    "semantic_hash": ""
+  },
+  "src/madify/__init__.py": {
+    "mtime": 1784491802.6637483,
+    "ast_hash": "cc1c3e75286e207cd2432fae5243083f",
+    "semantic_hash": ""
+  },
+  "src/madify/__main__.py": {
+    "mtime": 1784491802.9046302,
+    "ast_hash": "dba51a8ba48a977f4611af595ee9e2f3",
+    "semantic_hash": ""
+  },
+  "tests/test_cli.py": {
+    "mtime": 1784491833.3908083,
+    "ast_hash": "36d9b943eb56452fe0f59316f2dd7c80",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1784491804.7857625,
+    "ast_hash": "d287dd2309748ff379db7bc00e8c29b6",
+    "semantic_hash": ""
+  }
+}
