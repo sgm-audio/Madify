@@ -1,4 +1,4 @@
-from phortinize import main
+from madify import main
 
 if __name__ == "__main__":
     main()

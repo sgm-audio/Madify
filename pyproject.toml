@@ -1,17 +1,17 @@
 [project]
-name = "phortinize"
+name = "madify"
 version = "0.1.0"
 description = "Photo cataloguer and metadata assistant."
 readme = "README.md"
 license = "MIT"
 authors = [
-    { name = "Scott Mills", email = "scottmills306@gmail.com" },
+    { name = "Scott Mills", email = "scott@sgmstudfios.ca" },
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 dependencies = []
 
 [project.scripts]
-phortinize = "phortinize:main"
+madify = "madify:main"
 
 [build-system]
 requires = ["uv_build>=0.11.17,<0.12.0"]
@@ -24,7 +24,7 @@ dev = [
 ]
 
 [tool.ruff]
-target-version = "py310"
+target-version = "py312"
 line-length = 88
 src = ["src"]
 
@@ -37,9 +37,9 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"src/phortinize/__init__.py" = ["T201"]
-"src/phortinize/__main__.py" = ["T201"]
-"tests/**/*.py" = ["S101"]
+"src/madify/__init__.py" = ["T201"]
+"src/madify/__main__.py" = ["T201"]
+"tests/**/*.py" = ["S101", "S603", "INP001"]
 
 [tool.ruff.format]
 quote-style = "double"
