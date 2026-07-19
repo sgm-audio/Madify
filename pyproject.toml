@@ -39,6 +39,7 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "src/madify/__init__.py" = ["T201"]
 "src/madify/__main__.py" = ["T201"]
+"src/madify/cli.py" = ["T201"]
 "tests/**/*.py" = ["S101", "S603", "INP001"]
 
 [tool.ruff.format]

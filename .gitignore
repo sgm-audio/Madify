@@ -41,3 +41,7 @@ Thumbs.db
 
 # uv
 uv.toml.local
+
+# Local catalogs
+*.sqlite
+*.sqlite-journal

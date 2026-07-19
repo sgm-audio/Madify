@@ -15,7 +15,7 @@ def test_version_matches_package_metadata() -> None:
 def test_main_prints_app_name_and_version(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    main()
+    main([])
     captured = capsys.readouterr()
     assert captured.out == f"Madify {__version__}\n"
     assert captured.err == ""
