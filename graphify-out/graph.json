@@ -1,0 +1,214 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "label": "madify",
+      "file_type": "code",
+      "type": "package",
+      "ecosystem": "python",
+      "source_file": "pyproject.toml",
+      "source_location": "L1",
+      "version": "0.1.0",
+      "_origin": "ast",
+      "id": "pkg_madify",
+      "community": 3,
+      "community_name": "madify",
+      "norm_label": "madify"
+    },
+    {
+      "label": "__init__.py",
+      "file_type": "code",
+      "source_file": "src/madify/__init__.py",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "src_madify_init",
+      "community": 0,
+      "community_name": "test_main_prints_app_name_and_version",
+      "norm_label": "__init__.py"
+    },
+    {
+      "label": "main()",
+      "file_type": "code",
+      "source_file": "src/madify/__init__.py",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "src_madify_init_main",
+      "community": 0,
+      "community_name": "test_main_prints_app_name_and_version",
+      "norm_label": "main()"
+    },
+    {
+      "label": "__main__.py",
+      "file_type": "code",
+      "source_file": "src/madify/__main__.py",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "src_madify_main",
+      "community": 4,
+      "community_name": "__main__.py",
+      "norm_label": "__main__.py"
+    },
+    {
+      "label": "test_cli.py",
+      "file_type": "code",
+      "source_file": "tests/test_cli.py",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "tests_test_cli",
+      "community": 1,
+      "community_name": "test_cli.py",
+      "norm_label": "test_cli.py"
+    },
+    {
+      "label": "test_version_matches_package_metadata()",
+      "file_type": "code",
+      "source_file": "tests/test_cli.py",
+      "source_location": "L10",
+      "_origin": "ast",
+      "id": "tests_test_cli_test_version_matches_package_metadata",
+      "community": 1,
+      "community_name": "test_cli.py",
+      "norm_label": "test_version_matches_package_metadata()"
+    },
+    {
+      "label": "test_main_prints_app_name_and_version()",
+      "file_type": "code",
+      "source_file": "tests/test_cli.py",
+      "source_location": "L15",
+      "_origin": "ast",
+      "id": "tests_test_cli_test_main_prints_app_name_and_version",
+      "community": 0,
+      "community_name": "test_main_prints_app_name_and_version",
+      "norm_label": "test_main_prints_app_name_and_version()"
+    },
+    {
+      "label": "CaptureFixture",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "capturefixture",
+      "community": 0,
+      "community_name": "test_main_prints_app_name_and_version",
+      "norm_label": "capturefixture"
+    },
+    {
+      "label": "test_module_entry_prints_app_name_and_version()",
+      "file_type": "code",
+      "source_file": "tests/test_cli.py",
+      "source_location": "L24",
+      "_origin": "ast",
+      "id": "tests_test_cli_test_module_entry_prints_app_name_and_version",
+      "community": 1,
+      "community_name": "test_cli.py",
+      "norm_label": "test_module_entry_prints_app_name_and_version()"
+    },
+    {
+      "label": "README.md",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "readme",
+      "community": 2,
+      "community_name": "README.md",
+      "norm_label": "readme.md"
+    },
+    {
+      "label": "Madify",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "readme_madify",
+      "community": 2,
+      "community_name": "README.md",
+      "norm_label": "madify"
+    }
+  ],
+  "links": [
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/madify/__init__.py",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_madify_init",
+      "target": "src_madify_init_main",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "tests/test_cli.py",
+      "source_location": "L18",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "tests_test_cli_test_main_prints_app_name_and_version",
+      "target": "src_madify_init_main"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/test_cli.py",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "tests_test_cli",
+      "target": "tests_test_cli_test_main_prints_app_name_and_version",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/test_cli.py",
+      "source_location": "L24",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "tests_test_cli",
+      "target": "tests_test_cli_test_module_entry_prints_app_name_and_version",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/test_cli.py",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "tests_test_cli",
+      "target": "tests_test_cli_test_version_matches_package_metadata",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/test_cli.py",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "tests_test_cli_test_main_prints_app_name_and_version",
+      "target": "capturefixture",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "readme",
+      "target": "readme_madify",
+      "confidence_score": 1.0
+    }
+  ],
+  "hyperedges": [],
+  "built_at_commit": "09d6a8c99e18543d96895f753a4dc0c0a8025885"
+}
