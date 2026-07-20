@@ -20,6 +20,7 @@ build-backend = "uv_build"
 [dependency-groups]
 dev = [
     "pytest==8.4.1",
+    "pytest-cov==6.2.1",
     "ruff==0.12.4",
 ]
 
@@ -40,7 +41,7 @@ ignore = [
 "src/madify/__init__.py" = ["T201"]
 "src/madify/__main__.py" = ["T201"]
 "src/madify/cli.py" = ["T201"]
-"tests/**/*.py" = ["S101", "S603", "INP001"]
+"tests/**/*.py" = ["S101", "S603", "INP001", "SLF001", "PLR2004"]
 
 [tool.ruff.format]
 quote-style = "double"
@@ -49,4 +50,20 @@ line-ending = "lf"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["src"]
+pythonpath = ["src", "tests"]
+
+[tool.coverage.run]
+branch = false
+source = ["madify"]
+omit = [
+    "src/madify/cli.py",
+    "src/madify/__main__.py",
+    "src/madify/system_clock.py",
+    "src/madify/local_fs.py",
+    "src/madify/ports.py",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+fail_under = 85

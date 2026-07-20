@@ -3,5 +3,16 @@
   "1": "test_cli.py",
   "2": "README.md",
   "3": "madify",
-  "4": "__main__.py"
+  "4": "__main__.py",
+  "5": "MediaAsset",
+  "6": "errors.py",
+  "7": "models.py",
+  "8": "FileSystem",
+  "9": "CatalogStore",
+  "10": "ports.py",
+  "11": "naming.py",
+  "12": ".exists",
+  "13": ".is_directory",
+  "14": ".iter_files",
+  "15": ".rename"
 }
