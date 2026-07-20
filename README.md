@@ -1,5 +1,7 @@
 # Madify
 
+[![CI](https://github.com/scottmills306/Madify/actions/workflows/ci.yml/badge.svg)](https://github.com/scottmills306/Madify/actions/workflows/ci.yml)
+
 Madify is a local CLI that catalogues photo, PSD, and video files in SQLite, lets you set titles/descriptions/tags, and renames files from those titles. Metadata lives in the catalog today (file embed/sidecars are planned); the core stays free of direct filesystem/DB/clock access so it stays unit-testable.
 
 ## Features
