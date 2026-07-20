@@ -1,17 +1,17 @@
 {
   "pyproject.toml": {
-    "mtime": 1784511777.3327098,
-    "ast_hash": "042bf32e7e4478fef5df0f97bbd97072",
+    "mtime": 1784513512.8042395,
+    "ast_hash": "348a77d4d2e5852726833c4d252b5176",
     "semantic_hash": ""
   },
   "src/madify/__init__.py": {
-    "mtime": 1784499603.0991936,
-    "ast_hash": "73fb0e8f61c0f977347dea2131e931b2",
+    "mtime": 1784513454.5207381,
+    "ast_hash": "c79ffd6fb75d73b6b92f037eee266136",
     "semantic_hash": ""
   },
   "src/madify/__main__.py": {
-    "mtime": 1784499544.0043974,
-    "ast_hash": "e82418cac9ef4d223f17be3003e1cef9",
+    "mtime": 1784513454.5210903,
+    "ast_hash": "26247b744380341ad9c51eb1237befac",
     "semantic_hash": ""
   },
   "tests/test_cli.py": {
@@ -20,73 +20,73 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1784491804.7857625,
-    "ast_hash": "d287dd2309748ff379db7bc00e8c29b6",
+    "mtime": 1784513628.534624,
+    "ast_hash": "626051279ed34ec0adf438d0d8e00f8e",
     "semantic_hash": ""
   },
   "src/madify/cli.py": {
-    "mtime": 1784499639.0969117,
-    "ast_hash": "73bb7975f201513ec942d32e1c41adc5",
+    "mtime": 1784513454.301556,
+    "ast_hash": "f195ec280af9a84700863392c9027980",
     "semantic_hash": ""
   },
   "src/madify/errors.py": {
-    "mtime": 1784499466.0535946,
-    "ast_hash": "22b705ecd1b39f0f23d0ece37988d0bd",
+    "mtime": 1784513382.0303888,
+    "ast_hash": "7e18979b4886fa6784b8f9b9dc95a609",
     "semantic_hash": ""
   },
   "src/madify/local_fs.py": {
-    "mtime": 1784499521.908977,
-    "ast_hash": "4c586f0a8d079f2d82b405d498b422b1",
+    "mtime": 1784513444.2945116,
+    "ast_hash": "a052a363d7de5c4d075d3d03e2ebf3b9",
     "semantic_hash": ""
   },
   "src/madify/media_kinds.py": {
-    "mtime": 1784499474.0364497,
-    "ast_hash": "3651d484e6578c0d88269a9887dec5cf",
+    "mtime": 1784513537.085677,
+    "ast_hash": "6f6be29006343b4fdd095f5064762169",
     "semantic_hash": ""
   },
   "src/madify/models.py": {
-    "mtime": 1784499605.659571,
-    "ast_hash": "2fcd7144a67a5fe0b76d823c04600d8f",
+    "mtime": 1784513386.3115406,
+    "ast_hash": "4e2f6e4787fe70104d2cb42818073f55",
     "semantic_hash": ""
   },
   "src/madify/naming.py": {
-    "mtime": 1784499610.1923816,
-    "ast_hash": "418a947c059964532585f3aab895c48c",
+    "mtime": 1784513415.3385758,
+    "ast_hash": "feba1c744584acfcc1c2df77eba1be36",
     "semantic_hash": ""
   },
   "src/madify/ports.py": {
-    "mtime": 1784499608.3420942,
-    "ast_hash": "506380bfcb83ec37e898c867d3c0f883",
+    "mtime": 1784513404.4244268,
+    "ast_hash": "421b3e9a1bb73806b17a9e9961667c90",
     "semantic_hash": ""
   },
   "src/madify/rename_assets.py": {
-    "mtime": 1784499676.9068167,
-    "ast_hash": "e6cd5ee50313ee1fd1bf4c04b99d933c",
+    "mtime": 1784513427.30788,
+    "ast_hash": "a8a2ccbdf51ff0cbe524fd89d442b3a1",
     "semantic_hash": ""
   },
   "src/madify/scan.py": {
-    "mtime": 1784499612.7337248,
-    "ast_hash": "0d9a1e0065cb2ca41d18a028febfea5b",
+    "mtime": 1784513419.692134,
+    "ast_hash": "82093ef18dd0189d2751f0fc4060e504",
     "semantic_hash": ""
   },
   "src/madify/sqlite_catalog.py": {
-    "mtime": 1784499639.4540045,
-    "ast_hash": "525727c73673faedd8ef3f2b29200c42",
+    "mtime": 1784513443.7258017,
+    "ast_hash": "f6f201169e1b0f7da3d512e9ec9efd91",
     "semantic_hash": ""
   },
   "src/madify/system_clock.py": {
-    "mtime": 1784499521.8188257,
-    "ast_hash": "fcba5abf3967c33b4af00bbff6c1b629",
+    "mtime": 1784513453.0672965,
+    "ast_hash": "9cc4cd4c88429636359613eb5132f2fb",
     "semantic_hash": ""
   },
   "src/madify/tag_asset.py": {
-    "mtime": 1784499617.9165409,
-    "ast_hash": "d5fc2c02671967594da4802954a64a63",
+    "mtime": 1784513427.2609396,
+    "ast_hash": "10232947c84c2ee24e5971094324630f",
     "semantic_hash": ""
   },
   "src/madify/tagging.py": {
-    "mtime": 1784499477.207626,
-    "ast_hash": "a63a5f35e162431bf93401c0864be0b1",
+    "mtime": 1784513392.6349933,
+    "ast_hash": "ff07928313c27d3ae505d6d187112dc8",
     "semantic_hash": ""
   },
   "tests/fakes.py": {

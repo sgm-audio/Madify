@@ -1,4 +1,8 @@
-"""Narrow I/O ports injected into core use cases."""
+"""Narrow I/O ports injected into core use cases.
+
+Core modules depend only on these protocols. Production adapters live in
+``local_fs``, ``system_clock``, and ``sqlite_catalog``; tests supply fakes.
+"""
 
 from __future__ import annotations
 
@@ -11,11 +15,15 @@ if TYPE_CHECKING:
 
 
 class Clock(Protocol):
+    """Time source for audit timestamps."""
+
     def now(self) -> datetime:
         """Return the current timezone-aware UTC timestamp."""
 
 
 class FileSystem(Protocol):
+    """Filesystem operations required by scan and rename."""
+
     def is_directory(self, path: str) -> bool:
         """Return True when path exists and is a directory."""
 
@@ -30,6 +38,8 @@ class FileSystem(Protocol):
 
 
 class CatalogStore(Protocol):
+    """Persistent catalog of media assets and metadata."""
+
     def get_by_id(self, asset_id: int) -> MediaAsset | None:
         """Load one asset by id, or None."""
 
@@ -46,7 +56,11 @@ class CatalogStore(Protocol):
         *,
         now: datetime,
     ) -> tuple[MediaAsset, bool]:
-        """Insert or refresh a scanned path. Returns (asset, created)."""
+        """Insert or refresh a scanned path.
+
+        Returns:
+            ``(asset, created)`` where ``created`` is True on insert.
+        """
 
     def update_metadata(
         self,

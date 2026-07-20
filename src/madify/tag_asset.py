@@ -1,4 +1,8 @@
-"""Apply title, description, and tags to a catalogued asset."""
+"""Apply title, description, and tags to a catalogued asset.
+
+Resolves the target by id xor path, merges the request onto existing
+metadata, and persists via :class:`~madify.ports.CatalogStore`.
+"""
 
 from __future__ import annotations
 
@@ -20,6 +24,22 @@ def tag_asset(
     asset_id: int | None = None,
     path: str | None = None,
 ) -> MediaAsset:
+    """Update metadata for one asset identified by id or path.
+
+    Args:
+        catalog: Catalog store port.
+        clock: Clock port for ``updated_at``.
+        request: Partial metadata fields to apply.
+        asset_id: Catalog id (mutually exclusive with ``path``).
+        path: Absolute asset path (mutually exclusive with ``asset_id``).
+
+    Returns:
+        The updated :class:`~madify.models.MediaAsset`.
+
+    Raises:
+        AssetNotFoundError: Missing target, both id and path, or neither.
+        MetadataValidationError: Request fails validation (from tagging).
+    """
     asset = _resolve_asset(catalog, asset_id=asset_id, path=path)
     metadata = build_metadata(
         title=request.title,
@@ -36,6 +56,7 @@ def _resolve_asset(
     asset_id: int | None,
     path: str | None,
 ) -> MediaAsset:
+    """Load an asset by exactly one of ``asset_id`` or ``path``."""
     if asset_id is None and path is None:
         message = "provide asset id or path"
         raise AssetNotFoundError(message)

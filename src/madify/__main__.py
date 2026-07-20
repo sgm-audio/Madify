@@ -1,3 +1,5 @@
+"""``python -m madify`` entry point."""
+
 import sys
 
 from madify import main

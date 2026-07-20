@@ -9,10 +9,5 @@
   "7": "models.py",
   "8": "FileSystem",
   "9": "CatalogStore",
-  "10": "ports.py",
-  "11": "naming.py",
-  "12": ".exists",
-  "13": ".is_directory",
-  "14": ".iter_files",
-  "15": ".rename"
+  "11": "naming.py"
 }

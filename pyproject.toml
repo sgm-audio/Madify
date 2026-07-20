@@ -19,6 +19,7 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "pdoc==15.0.4",
     "pytest==8.4.1",
     "pytest-cov==6.2.1",
     "ruff==0.12.4",
@@ -32,16 +33,18 @@ src = ["src"]
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
-    "D",      # docs are Phase 4
     "COM812", # conflicts with formatter
     "ISC001", # conflicts with formatter
 ]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
 
 [tool.ruff.lint.per-file-ignores]
 "src/madify/__init__.py" = ["T201"]
 "src/madify/__main__.py" = ["T201"]
 "src/madify/cli.py" = ["T201"]
-"tests/**/*.py" = ["S101", "S603", "INP001", "SLF001", "PLR2004"]
+"tests/**/*.py" = ["D", "S101", "S603", "INP001", "SLF001", "PLR2004"]
 
 [tool.ruff.format]
 quote-style = "double"

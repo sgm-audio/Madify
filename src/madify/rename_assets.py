@@ -1,4 +1,9 @@
-"""Rename catalogued files from their titles via injected filesystem."""
+"""Rename catalogued files from their titles via injected filesystem.
+
+Bulk rename skips untitled assets. Renaming a single ``asset_id`` without a
+title raises :class:`~madify.errors.RenameError`. Destination collisions with
+neighbors or other catalogued paths get ``_2``, ``_3``, … suffixes.
+"""
 
 from __future__ import annotations
 
@@ -20,6 +25,23 @@ def rename_assets(
     clock: Clock,
     asset_id: int | None = None,
 ) -> RenameResult:
+    """Rename one asset or every titled asset in the catalog.
+
+    Args:
+        catalog: Catalog store port.
+        fs: Filesystem port used for existence checks and renames.
+        clock: Clock port for ``updated_at`` after a successful move.
+        asset_id: When set, only that asset is considered; when ``None``,
+            all catalogued assets are considered.
+
+    Returns:
+        Renamed and unchanged asset collections.
+
+    Raises:
+        AssetNotFoundError: ``asset_id`` was given but does not exist.
+        RenameError: Targeted asset has no title, destination exists, or
+            the filesystem rename fails.
+    """
     assets = _assets_to_rename(catalog, asset_id=asset_id)
     taken = _build_taken_paths(assets, catalog=catalog, fs=fs)
     renamed: list[MediaAsset] = []
@@ -49,6 +71,7 @@ def _assets_to_rename(
     *,
     asset_id: int | None,
 ) -> list[MediaAsset]:
+    """Return the asset list for a rename pass."""
     if asset_id is None:
         return catalog.list_assets()
     asset = catalog.get_by_id(asset_id)
@@ -64,6 +87,7 @@ def _build_taken_paths(
     catalog: CatalogStore,
     fs: FileSystem,
 ) -> set[str]:
+    """Casefolded set of catalog paths plus on-disk neighbor files."""
     taken = {a.path.casefold() for a in catalog.list_assets()}
     for path in _existing_neighbor_paths(assets, fs):
         taken.add(path.casefold())
@@ -78,6 +102,7 @@ def _rename_one(
     clock: Clock,
     taken: set[str],
 ) -> MediaAsset | None:
+    """Rename a single titled asset; return ``None`` when unchanged."""
     if not asset.metadata.title.strip():
         return None
 
@@ -108,6 +133,7 @@ def _rename_one(
 
 
 def _existing_neighbor_paths(assets: list[MediaAsset], fs: FileSystem) -> list[str]:
+    """List files in each unique parent directory of ``assets``."""
     parents: set[str] = set()
     for asset in assets:
         parent = str(PurePath(asset.path).parent)

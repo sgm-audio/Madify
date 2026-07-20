@@ -1,4 +1,8 @@
-"""Domain and application errors with explicit failure modes."""
+"""Domain and application errors with explicit failure modes.
+
+All expected Madify failures subclass :class:`MadifyError` so the CLI can
+map them to a non-zero exit without catching unexpected exceptions.
+"""
 
 
 class MadifyError(Exception):
@@ -6,24 +10,24 @@ class MadifyError(Exception):
 
 
 class UnsupportedMediaError(MadifyError):
-    """Path is not a supported image, PSD, or video file."""
+    """Raised when a path is not a supported image, PSD, or video file."""
 
 
 class AssetNotFoundError(MadifyError):
-    """Requested catalog asset does not exist."""
+    """Raised when a requested catalog asset does not exist or is ambiguous."""
 
 
 class MetadataValidationError(MadifyError):
-    """Title, description, or tags failed validation."""
+    """Raised when title, description, or tags fail validation rules."""
 
 
 class RenameError(MadifyError):
-    """File cannot be renamed (missing title, collision, or filesystem failure)."""
+    """Raised when a file cannot be renamed (missing title, collision, FS)."""
 
 
 class CatalogError(MadifyError):
-    """Catalog store operation failed."""
+    """Raised when a catalog store operation fails."""
 
 
 class ScanError(MadifyError):
-    """Scan root is missing or not a directory."""
+    """Raised when a scan root is missing or not a directory."""

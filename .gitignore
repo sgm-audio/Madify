@@ -26,6 +26,9 @@ htmlcov/
 .tox/
 .nox/
 
+# Generated API docs (pdoc)
+docs/api/
+
 # OS / editor
 .DS_Store
 Thumbs.db

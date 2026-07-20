@@ -1,4 +1,10 @@
-"""CLI for scan, tag, and rename against a SQLite catalog."""
+"""CLI for scan, tag, and rename against a SQLite catalog.
+
+Wires production adapters (:class:`~madify.local_fs.LocalFileSystem`,
+:class:`~madify.system_clock.SystemClock`,
+:class:`~madify.sqlite_catalog.SqliteCatalog`) into the core use cases and
+prints human-readable summaries. Expected domain errors become exit code 1.
+"""
 
 from __future__ import annotations
 
@@ -17,6 +23,15 @@ from madify.tag_asset import tag_asset
 
 
 def run_cli(argv: list[str]) -> int:
+    """Parse ``argv`` and run the selected subcommand.
+
+    Args:
+        argv: Argument list without the program name (as for
+            ``argparse.ArgumentParser.parse_args``).
+
+    Returns:
+        Process exit code (0 on success, 1 on :class:`~madify.errors.MadifyError`).
+    """
     parser = _build_parser()
     args = parser.parse_args(argv)
     db_path = str(Path(args.db).resolve())
@@ -43,6 +58,7 @@ def _dispatch(
     catalog: SqliteCatalog,
     clock: SystemClock,
 ) -> int:
+    """Route a parsed namespace to the matching command handler."""
     if args.command == "scan":
         return _cmd_scan(args, fs=fs, catalog=catalog, clock=clock)
     if args.command == "tag":
@@ -54,6 +70,7 @@ def _dispatch(
 
 
 def _build_parser() -> argparse.ArgumentParser:
+    """Build the top-level ``madify`` argument parser."""
     parser = argparse.ArgumentParser(
         prog="madify",
         description="Photo cataloguer and metadata assistant.",
@@ -103,6 +120,7 @@ def _cmd_scan(
     catalog: SqliteCatalog,
     clock: SystemClock,
 ) -> int:
+    """Run ``scan`` and print a summary."""
     root = str(Path(args.root).resolve())
     result = scan_directory(root, fs=fs, catalog=catalog, clock=clock)
     print(
@@ -122,6 +140,7 @@ def _cmd_tag(
     catalog: SqliteCatalog,
     clock: SystemClock,
 ) -> int:
+    """Run ``tag`` and print the resulting metadata."""
     path = None if args.path is None else str(Path(args.path).resolve())
     asset = tag_asset(
         catalog=catalog,
@@ -149,6 +168,7 @@ def _cmd_rename(
     catalog: SqliteCatalog,
     clock: SystemClock,
 ) -> int:
+    """Run ``rename`` and print renamed paths."""
     result = rename_assets(
         catalog=catalog,
         fs=fs,

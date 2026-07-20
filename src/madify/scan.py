@@ -1,4 +1,9 @@
-"""Scan a directory and upsert supported media into the catalog."""
+"""Scan a directory and upsert supported media into the catalog.
+
+Uses injected :class:`~madify.ports.FileSystem`,
+:class:`~madify.ports.CatalogStore`, and :class:`~madify.ports.Clock` only —
+no direct OS or database imports.
+"""
 
 from __future__ import annotations
 
@@ -19,6 +24,23 @@ def scan_directory(
     catalog: CatalogStore,
     clock: Clock,
 ) -> ScanResult:
+    """Walk ``root`` and upsert every supported media file.
+
+    Unsupported files are listed in :attr:`~madify.models.ScanResult.skipped`
+    and never raise. Paths are processed in sorted order for determinism.
+
+    Args:
+        root: Directory to scan recursively.
+        fs: Filesystem port.
+        catalog: Catalog store port.
+        clock: Clock port for ``created_at`` / ``updated_at``.
+
+    Returns:
+        Added, updated, and skipped path collections.
+
+    Raises:
+        ScanError: ``root`` is not an existing directory.
+    """
     if not fs.is_directory(root):
         message = f"scan root is not a directory: {root}"
         raise ScanError(message)

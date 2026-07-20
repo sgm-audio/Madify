@@ -1,4 +1,9 @@
-"""SQLite catalog store adapter."""
+"""SQLite catalog store adapter.
+
+Implements :class:`~madify.ports.CatalogStore` with the stdlib ``sqlite3``
+module. Tags are stored as a JSON array string. Corrupt ``tags_json`` values
+raise :class:`~madify.errors.CatalogError` on read.
+"""
 
 from __future__ import annotations
 
@@ -25,7 +30,15 @@ CREATE TABLE IF NOT EXISTS assets (
 
 
 class SqliteCatalog:
+    """File-backed SQLite implementation of the catalog port.
+
+    Args:
+        db_path: Path to the SQLite database file. Parent directories are
+            created when needed.
+    """
+
     def __init__(self, db_path: str) -> None:
+        """Open (or create) the database and ensure the schema exists."""
         self._db_path = db_path
         parent = Path(db_path).parent
         if str(parent) not in {"", "."}:
@@ -41,9 +54,11 @@ class SqliteCatalog:
             raise CatalogError(message) from exc
 
     def close(self) -> None:
+        """Close the underlying SQLite connection."""
         self._conn.close()
 
     def get_by_id(self, asset_id: int) -> MediaAsset | None:
+        """Load one asset by primary key, or ``None`` if missing."""
         row = self._conn.execute(
             "SELECT * FROM assets WHERE id = ?",
             (asset_id,),
@@ -51,6 +66,7 @@ class SqliteCatalog:
         return None if row is None else self._row_to_asset(row)
 
     def get_by_path(self, path: str) -> MediaAsset | None:
+        """Load one asset by absolute path, or ``None`` if missing."""
         row = self._conn.execute(
             "SELECT * FROM assets WHERE path = ?",
             (path,),
@@ -58,6 +74,7 @@ class SqliteCatalog:
         return None if row is None else self._row_to_asset(row)
 
     def list_assets(self) -> list[MediaAsset]:
+        """Return all assets ordered by ascending id."""
         rows = self._conn.execute("SELECT * FROM assets ORDER BY id ASC").fetchall()
         return [self._row_to_asset(row) for row in rows]
 
@@ -68,6 +85,19 @@ class SqliteCatalog:
         *,
         now: datetime,
     ) -> tuple[MediaAsset, bool]:
+        """Insert a new scanned path or refresh kind/timestamp on an existing one.
+
+        Args:
+            path: Absolute media path.
+            kind: Classified media kind.
+            now: Timestamp for created/updated fields.
+
+        Returns:
+            ``(asset, created)`` where ``created`` is True on insert.
+
+        Raises:
+            CatalogError: Underlying SQLite failure.
+        """
         existing = self.get_by_path(path)
         stamp = _iso(now)
         try:
@@ -84,6 +114,7 @@ class SqliteCatalog:
         kind: MediaKind,
         stamp: str,
     ) -> MediaAsset:
+        """Insert a blank-metadata row for a newly scanned file."""
         cur = self._conn.execute(
             """
             INSERT INTO assets (
@@ -107,6 +138,7 @@ class SqliteCatalog:
         kind: MediaKind,
         stamp: str,
     ) -> MediaAsset:
+        """Update kind and ``updated_at`` for an already-catalogued path."""
         self._conn.execute(
             """
             UPDATE assets
@@ -129,6 +161,12 @@ class SqliteCatalog:
         *,
         now: datetime,
     ) -> MediaAsset:
+        """Replace title, description, and tags for ``asset_id``.
+
+        Raises:
+            AssetNotFoundError: No row with that id.
+            CatalogError: SQLite failure.
+        """
         try:
             cur = self._conn.execute(
                 """
@@ -164,6 +202,12 @@ class SqliteCatalog:
         *,
         now: datetime,
     ) -> MediaAsset:
+        """Update the stored path after a successful filesystem rename.
+
+        Raises:
+            AssetNotFoundError: No row with that id.
+            CatalogError: Path uniqueness conflict or other SQLite failure.
+        """
         try:
             cur = self._conn.execute(
                 """
@@ -191,6 +235,7 @@ class SqliteCatalog:
 
     @staticmethod
     def _row_to_asset(row: sqlite3.Row) -> MediaAsset:
+        """Map a SQLite row to a :class:`~madify.models.MediaAsset`."""
         try:
             raw_tags = json.loads(row["tags_json"])
         except json.JSONDecodeError as exc:
@@ -217,8 +262,10 @@ class SqliteCatalog:
 
 
 def _iso(value: datetime) -> str:
+    """Serialize a datetime to ISO-8601 text for SQLite storage."""
     return value.isoformat()
 
 
 def _parse_iso(value: str) -> datetime:
+    """Parse an ISO-8601 timestamp from the catalog."""
     return datetime.fromisoformat(value)
