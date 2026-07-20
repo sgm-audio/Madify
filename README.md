@@ -14,9 +14,11 @@ Madify is a local CLI that catalogues photo, PSD, and video files in SQLite, let
 
 Requires **Python ≥ 3.12** and [uv](https://docs.astral.sh/uv/).
 
-From a checkout of this repository:
+Clone the private repository (you need access), then sync:
 
 ```bash
+git clone https://github.com/scottmills306/Madify.git
+cd Madify
 uv sync --group dev
 ```
 
@@ -179,3 +181,13 @@ API HTML lands in `docs/api/` (gitignored generated output).
 ## License
 
 MIT — see [LICENSE](LICENSE). Copyright (c) 2026 Scott Mills.
+
+## Appendix: Supported extensions
+
+Classification is **extension-only** (case-insensitive). Anything else is skipped on scan.
+
+| Kind | Extensions |
+|------|------------|
+| **Image** | `.jpg`, `.jpeg`, `.png`, `.gif`, `.webp`, `.tif`, `.tiff`, `.bmp`, `.heic`, `.heif`, `.raw`, `.cr2`, `.nef`, `.arw`, `.dng`, `.orf`, `.rw2` |
+| **Photoshop** | `.psd`, `.psb` |
+| **Video** | `.mp4`, `.mov`, `.mkv`, `.avi`, `.webm`, `.m4v`, `.wmv`, `.mpg`, `.mpeg`, `.3gp` |
