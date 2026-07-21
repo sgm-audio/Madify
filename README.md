@@ -1,6 +1,7 @@
 # Madify
 
 [![CI](https://github.com/scottmills306/Madify/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/scottmills306/Madify/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/scottmills306/Madify)](https://github.com/scottmills306/Madify/releases/latest)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
