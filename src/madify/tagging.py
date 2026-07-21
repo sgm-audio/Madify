@@ -2,7 +2,8 @@
 
 Normalization is pure: no I/O. Empty titles are allowed (assets may be
 untitled until the user tags them). Tag lists are casefold-deduped while
-preserving the first-seen spelling and order.
+preserving the first-seen spelling and order. By default new tags **merge**
+onto existing ones; pass ``replace_tags=True`` to replace the full set.
 """
 
 from __future__ import annotations
@@ -90,14 +91,17 @@ def build_metadata(
     description: str | None = None,
     tags: list[str] | tuple[str, ...] | None = None,
     base: MediaMetadata | None = None,
+    replace_tags: bool = False,
 ) -> MediaMetadata:
     """Merge a partial update onto ``base`` (or empty metadata).
 
     Args:
         title: New title, or ``None`` to keep ``base.title``.
         description: New description, or ``None`` to keep ``base.description``.
-        tags: Replacement tag list, or ``None`` to keep ``base.tags``.
+        tags: Tags to merge or replace, or ``None`` to keep ``base.tags``.
         base: Existing metadata; defaults to empty fields.
+        replace_tags: When True, ``tags`` replaces the full set; when False,
+            ``tags`` are merged onto ``base.tags`` (casefold-deduped).
 
     Returns:
         A new :class:`~madify.models.MediaMetadata` instance.
@@ -116,7 +120,12 @@ def build_metadata(
         if description is None
         else normalize_description(description)
     )
-    new_tags = current.tags if tags is None else normalize_tags(tags)
+    if tags is None:
+        new_tags = current.tags
+    elif replace_tags:
+        new_tags = normalize_tags(tags)
+    else:
+        new_tags = normalize_tags([*current.tags, *tags])
     return MediaMetadata(
         title=new_title,
         description=new_description,

@@ -96,9 +96,12 @@ class TagRequest:
     Attributes:
         title: New title, or ``None`` to keep the current title.
         description: New description, or ``None`` to keep the current one.
-        tags: Full replacement tag list, or ``None`` to keep current tags.
+        tags: Tags to apply (merge or replace per ``replace_tags``).
+        replace_tags: When True with ``tags`` set, replace the full tag set;
+            when False (default), merge onto existing tags.
     """
 
     title: str | None = None
     description: str | None = None
     tags: list[str] | None = None
+    replace_tags: bool = False

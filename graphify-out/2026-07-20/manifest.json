@@ -1,0 +1,132 @@
+{
+  "pyproject.toml": {
+    "mtime": 1784513512.8042395,
+    "ast_hash": "348a77d4d2e5852726833c4d252b5176",
+    "semantic_hash": ""
+  },
+  "src/madify/__init__.py": {
+    "mtime": 1784513454.5207381,
+    "ast_hash": "c79ffd6fb75d73b6b92f037eee266136",
+    "semantic_hash": ""
+  },
+  "src/madify/__main__.py": {
+    "mtime": 1784513454.5210903,
+    "ast_hash": "26247b744380341ad9c51eb1237befac",
+    "semantic_hash": ""
+  },
+  "tests/test_cli.py": {
+    "mtime": 1784499544.9570158,
+    "ast_hash": "b3c162fd166aa74bd93cece9fde3e622",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1784513628.534624,
+    "ast_hash": "626051279ed34ec0adf438d0d8e00f8e",
+    "semantic_hash": ""
+  },
+  "src/madify/cli.py": {
+    "mtime": 1784513454.301556,
+    "ast_hash": "f195ec280af9a84700863392c9027980",
+    "semantic_hash": ""
+  },
+  "src/madify/errors.py": {
+    "mtime": 1784513382.0303888,
+    "ast_hash": "7e18979b4886fa6784b8f9b9dc95a609",
+    "semantic_hash": ""
+  },
+  "src/madify/local_fs.py": {
+    "mtime": 1784513444.2945116,
+    "ast_hash": "a052a363d7de5c4d075d3d03e2ebf3b9",
+    "semantic_hash": ""
+  },
+  "src/madify/media_kinds.py": {
+    "mtime": 1784513537.085677,
+    "ast_hash": "6f6be29006343b4fdd095f5064762169",
+    "semantic_hash": ""
+  },
+  "src/madify/models.py": {
+    "mtime": 1784513386.3115406,
+    "ast_hash": "4e2f6e4787fe70104d2cb42818073f55",
+    "semantic_hash": ""
+  },
+  "src/madify/naming.py": {
+    "mtime": 1784513415.3385758,
+    "ast_hash": "feba1c744584acfcc1c2df77eba1be36",
+    "semantic_hash": ""
+  },
+  "src/madify/ports.py": {
+    "mtime": 1784513404.4244268,
+    "ast_hash": "421b3e9a1bb73806b17a9e9961667c90",
+    "semantic_hash": ""
+  },
+  "src/madify/rename_assets.py": {
+    "mtime": 1784513427.30788,
+    "ast_hash": "a8a2ccbdf51ff0cbe524fd89d442b3a1",
+    "semantic_hash": ""
+  },
+  "src/madify/scan.py": {
+    "mtime": 1784513419.692134,
+    "ast_hash": "82093ef18dd0189d2751f0fc4060e504",
+    "semantic_hash": ""
+  },
+  "src/madify/sqlite_catalog.py": {
+    "mtime": 1784513443.7258017,
+    "ast_hash": "f6f201169e1b0f7da3d512e9ec9efd91",
+    "semantic_hash": ""
+  },
+  "src/madify/system_clock.py": {
+    "mtime": 1784513453.0672965,
+    "ast_hash": "9cc4cd4c88429636359613eb5132f2fb",
+    "semantic_hash": ""
+  },
+  "src/madify/tag_asset.py": {
+    "mtime": 1784513427.2609396,
+    "ast_hash": "10232947c84c2ee24e5971094324630f",
+    "semantic_hash": ""
+  },
+  "src/madify/tagging.py": {
+    "mtime": 1784513392.6349933,
+    "ast_hash": "ff07928313c27d3ae505d6d187112dc8",
+    "semantic_hash": ""
+  },
+  "tests/fakes.py": {
+    "mtime": 1784511576.4637349,
+    "ast_hash": "dbb187c7e5ff72bc2f1e3dcdad6b550d",
+    "semantic_hash": ""
+  },
+  "tests/test_media_kinds.py": {
+    "mtime": 1784511601.2150078,
+    "ast_hash": "1ae3220226cfbff6f3cb4f097e46ea63",
+    "semantic_hash": ""
+  },
+  "tests/test_naming.py": {
+    "mtime": 1784511786.7086272,
+    "ast_hash": "e04e34aacdb4050630b3477041cb7192",
+    "semantic_hash": ""
+  },
+  "tests/test_rename_assets.py": {
+    "mtime": 1784511815.5859754,
+    "ast_hash": "918e65b52fc7949752df07fc8ab62dff",
+    "semantic_hash": ""
+  },
+  "tests/test_scan.py": {
+    "mtime": 1784511806.4520774,
+    "ast_hash": "d576dc0080dee5ffd8bd63cfaedd1be6",
+    "semantic_hash": ""
+  },
+  "tests/test_sqlite_catalog.py": {
+    "mtime": 1784511821.1299832,
+    "ast_hash": "9f4fda907d19f3fa331e6b8fa31840f4",
+    "semantic_hash": ""
+  },
+  "tests/test_tag_asset.py": {
+    "mtime": 1784511818.3614905,
+    "ast_hash": "4764fe57c0a235b61ccce73bb8089baf",
+    "semantic_hash": ""
+  },
+  "tests/test_tagging.py": {
+    "mtime": 1784511608.26571,
+    "ast_hash": "5ced7ad79960d703a5b06b5880396f04",
+    "semantic_hash": ""
+  }
+}

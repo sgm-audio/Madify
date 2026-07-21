@@ -79,3 +79,14 @@ class CatalogStore(Protocol):
         now: datetime,
     ) -> MediaAsset:
         """Update stored path after a successful rename."""
+
+
+class MetadataWriter(Protocol):
+    """Write descriptive metadata beside or into a media file."""
+
+    def write(self, path: str, metadata: MediaMetadata) -> None:
+        """Persist title, description, and tags for ``path``.
+
+        Raises:
+            OSError: Underlying write failed.
+        """

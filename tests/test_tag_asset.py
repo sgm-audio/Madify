@@ -3,14 +3,19 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from pathlib import PurePath
+from pathlib import Path, PurePath
 
 import pytest
 from fakes import FakeClock, InMemoryCatalog
 
-from madify.errors import AssetNotFoundError, MetadataValidationError
+from madify.errors import (
+    AssetNotFoundError,
+    MetadataValidationError,
+    MetadataWriteError,
+)
 from madify.models import MediaAsset, MediaKind, MediaMetadata, TagRequest
 from madify.tag_asset import tag_asset
+from madify.xmp_sidecar import XmpSidecarWriter
 
 
 def _p(*parts: str) -> str:
@@ -44,11 +49,65 @@ def test_tag_by_id_updates_metadata_and_clock() -> None:
     )
     assert updated.metadata.title == "New"
     assert updated.metadata.description == "d"
-    assert updated.metadata.tags == ("demo", "clip")
+    assert updated.metadata.tags == ("x", "demo", "clip")
     assert updated.updated_at == clock.now()
 
 
-def test_tag_by_path() -> None:
+def test_tag_replace_tags() -> None:
+    catalog = InMemoryCatalog()
+    _seed(catalog)
+    updated = tag_asset(
+        catalog=catalog,
+        clock=FakeClock(),
+        asset_id=1,
+        request=TagRequest(tags=["only"], replace_tags=True),
+    )
+    assert updated.metadata.tags == ("only",)
+
+
+def test_tag_writes_sidecar(tmp_path: Path) -> None:
+    media = tmp_path / "a.jpg"
+    media.write_bytes(b"x")
+    catalog = InMemoryCatalog()
+    now = datetime(2026, 1, 1, tzinfo=UTC)
+    catalog.seed(
+        MediaAsset(
+            id=1,
+            path=str(media),
+            kind=MediaKind.IMAGE,
+            metadata=MediaMetadata(),
+            created_at=now,
+            updated_at=now,
+        ),
+    )
+    tag_asset(
+        catalog=catalog,
+        clock=FakeClock(),
+        asset_id=1,
+        request=TagRequest(title="T", tags=["z"]),
+        metadata_writer=XmpSidecarWriter(),
+    )
+    assert (tmp_path / "a.xmp").is_file()
+
+
+def test_tag_sidecar_oserror_wraps() -> None:
+    class Boom:
+        def write(self, path: str, metadata: MediaMetadata) -> None:
+            del path, metadata
+            message = "disk full"
+            raise OSError(message)
+
+    catalog = InMemoryCatalog()
+    _seed(catalog)
+    with pytest.raises(MetadataWriteError, match="failed to write metadata"):
+        tag_asset(
+            catalog=catalog,
+            clock=FakeClock(),
+            asset_id=1,
+            request=TagRequest(title="T"),
+            metadata_writer=Boom(),  # type: ignore[arg-type]
+        )
+
     catalog = InMemoryCatalog()
     _seed(catalog)
     updated = tag_asset(

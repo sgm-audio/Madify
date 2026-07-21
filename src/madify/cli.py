@@ -1,9 +1,7 @@
-"""CLI for scan, tag, and rename against a SQLite catalog.
+"""CLI for scan, tag, rename, list, and search against a SQLite catalog.
 
-Wires production adapters (:class:`~madify.local_fs.LocalFileSystem`,
-:class:`~madify.system_clock.SystemClock`,
-:class:`~madify.sqlite_catalog.SqliteCatalog`) into the core use cases and
-prints human-readable summaries. Expected domain errors become exit code 1.
+Wires production adapters into the core use cases and prints human-readable
+summaries. Expected domain errors become exit code 1.
 """
 
 from __future__ import annotations
@@ -14,12 +12,14 @@ from pathlib import Path
 
 from madify.errors import MadifyError
 from madify.local_fs import LocalFileSystem
-from madify.models import TagRequest
+from madify.models import MediaAsset, TagRequest
+from madify.query import list_catalog, search_catalog
 from madify.rename_assets import rename_assets
 from madify.scan import scan_directory
 from madify.sqlite_catalog import SqliteCatalog
 from madify.system_clock import SystemClock
 from madify.tag_asset import tag_asset
+from madify.xmp_sidecar import XmpSidecarWriter
 
 
 def run_cli(argv: list[str]) -> int:
@@ -65,6 +65,10 @@ def _dispatch(
         return _cmd_tag(args, catalog=catalog, clock=clock)
     if args.command == "rename":
         return _cmd_rename(args, fs=fs, catalog=catalog, clock=clock)
+    if args.command == "list":
+        return _cmd_list(catalog=catalog)
+    if args.command == "search":
+        return _cmd_search(args, catalog=catalog)
     message = f"unknown command: {args.command}"
     raise MadifyError(message)
 
@@ -96,7 +100,17 @@ def _build_parser() -> argparse.ArgumentParser:
         action="append",
         dest="tags",
         default=None,
-        help="Tag (repeatable)",
+        help="Tag to merge (repeatable); use --replace-tags to replace all",
+    )
+    tag_p.add_argument(
+        "--replace-tags",
+        action="store_true",
+        help="Replace the full tag set instead of merging",
+    )
+    tag_p.add_argument(
+        "--no-sidecar",
+        action="store_true",
+        help="Skip writing an XMP sidecar next to the media file",
     )
 
     rename_p = sub.add_parser(
@@ -109,6 +123,21 @@ def _build_parser() -> argparse.ArgumentParser:
         dest="asset_id",
         default=None,
         help="Rename one asset id (default: all with titles)",
+    )
+
+    sub.add_parser("list", help="List all catalogued assets")
+
+    search_p = sub.add_parser("search", help="Search assets by query and/or tag")
+    search_p.add_argument(
+        "--query",
+        "-q",
+        default=None,
+        help="Case-insensitive substring (title, description, path, tags)",
+    )
+    search_p.add_argument(
+        "--tag",
+        default=None,
+        help="Require this tag (case-insensitive exact match)",
     )
     return parser
 
@@ -140,17 +169,20 @@ def _cmd_tag(
     catalog: SqliteCatalog,
     clock: SystemClock,
 ) -> int:
-    """Run ``tag`` and print the resulting metadata."""
+    """Run ``tag``, write XMP sidecar (unless disabled), print metadata."""
     path = None if args.path is None else str(Path(args.path).resolve())
+    writer = None if args.no_sidecar else XmpSidecarWriter()
     asset = tag_asset(
         catalog=catalog,
         clock=clock,
         asset_id=args.asset_id,
         path=path,
+        metadata_writer=writer,
         request=TagRequest(
             title=args.title,
             description=args.description,
             tags=args.tags,
+            replace_tags=args.replace_tags,
         ),
     )
     tags = ",".join(asset.metadata.tags) if asset.metadata.tags else ""
@@ -182,3 +214,31 @@ def _cmd_rename(
     for asset in result.renamed:
         print(f"  -> id={asset.id} {asset.path}")
     return 0
+
+
+def _cmd_list(*, catalog: SqliteCatalog) -> int:
+    """Print every catalogued asset."""
+    assets = list_catalog(catalog)
+    print(f"assets: {len(assets)}")
+    for asset in assets:
+        _print_asset_line(asset)
+    return 0
+
+
+def _cmd_search(args: argparse.Namespace, *, catalog: SqliteCatalog) -> int:
+    """Print assets matching query/tag filters."""
+    try:
+        assets = search_catalog(catalog, query=args.query, tag=args.tag)
+    except ValueError as exc:
+        raise MadifyError(str(exc)) from exc
+    print(f"matches: {len(assets)}")
+    for asset in assets:
+        _print_asset_line(asset)
+    return 0
+
+
+def _print_asset_line(asset: MediaAsset) -> None:
+    """Format one asset summary line for list/search output."""
+    tags = ",".join(asset.metadata.tags) if asset.metadata.tags else ""
+    title = asset.metadata.title or "(untitled)"
+    print(f"  id={asset.id} [{asset.kind.value}] {title!r} tags=[{tags}] {asset.path}")

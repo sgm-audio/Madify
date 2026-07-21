@@ -31,3 +31,7 @@ class CatalogError(MadifyError):
 
 class ScanError(MadifyError):
     """Raised when a scan root is missing or not a directory."""
+
+
+class MetadataWriteError(MadifyError):
+    """Raised when writing file/sidecar metadata fails after a catalog update."""

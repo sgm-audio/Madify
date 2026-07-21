@@ -67,7 +67,17 @@ def test_build_metadata_requires_at_least_one_field() -> None:
 def test_build_metadata_merges_onto_base() -> None:
     base = MediaMetadata(title="Old", description="keep", tags=("a",))
     result = build_metadata(title="New", tags=["b", "c"], base=base)
-    assert result == MediaMetadata(title="New", description="keep", tags=("b", "c"))
+    assert result == MediaMetadata(
+        title="New",
+        description="keep",
+        tags=("a", "b", "c"),
+    )
+
+
+def test_build_metadata_replace_tags() -> None:
+    base = MediaMetadata(title="Old", tags=("a",))
+    result = build_metadata(tags=["b", "c"], base=base, replace_tags=True)
+    assert result.tags == ("b", "c")
 
 
 def test_build_metadata_partial_description_only() -> None:

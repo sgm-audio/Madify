@@ -4,18 +4,21 @@
 [![Release](https://img.shields.io/github/v/release/scottmills306/Madify)](https://github.com/scottmills306/Madify/releases/latest)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Coverage](https://img.shields.io/badge/coverage-%E2%89%A585%25-brightgreen)](https://github.com/scottmills306/Madify/actions/workflows/ci.yml)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
-Madify is a local CLI that catalogues photo, PSD, and video files in SQLite, lets you set titles/descriptions/tags, and renames files from those titles. Metadata lives in the catalog today (file embed/sidecars are planned); the core stays free of direct filesystem/DB/clock access so it stays unit-testable.
+Madify is a local CLI that catalogues photo, PSD, and video files in SQLite, lets you set titles/descriptions/tags, and renames files from those titles. On `tag`, it also writes an **XMP sidecar** next to the media file (catalog stays source of truth). The core never touches the filesystem, database, or clock directly — those are injected ports so unit tests stay deterministic.
 
 ## Features
 
-- Recursive **scan** of a directory into a SQLite catalog (images, Photoshop `.psd`/`.psb`, common video)
-- **Tag** assets by id or path (title, description, repeatable tags)
-- **Rename** files from sanitized titles (`Clip One` → `Clip_One.jpg`), with `_2`, `_3`, … on collisions
-- Zero runtime dependencies (stdlib `sqlite3` + `pathlib`)
-- Injectable clock / filesystem / catalog ports for deterministic tests
+- Recursive **scan** into SQLite (images, Photoshop `.psd`/`.psb`, common video)
+- **Tag** by id or path — tags **merge** by default; `--replace-tags` replaces the set
+- **XMP sidecar** write-back on tag (`--no-sidecar` to skip)
+- **List** / **search** the catalog
+- **Rename** from sanitized titles (`Clip One` → `Clip_One.jpg`), collisions → `_2`, `_3`, …
+- Zero runtime dependencies (stdlib only)
+- Injectable Clock / FileSystem / CatalogStore / MetadataWriter ports
 
 ## Install
 
@@ -25,28 +28,28 @@ Requires **Python ≥ 3.12** and [uv](https://docs.astral.sh/uv/).
 git clone https://github.com/scottmills306/Madify.git
 cd Madify
 uv sync --group dev
-```
-
-```text
-Resolved 13 packages in 0.89ms
-Checked 13 packages in 1ms
-```
-
-```bash
 uv run madify
 ```
 
 ```text
-Madify 0.1.0
+Madify 0.2.0
 ```
-## Quickstart
 
-Commands below were run on Windows with a temp media folder and a catalog **outside** that folder (so the `.sqlite` file is not counted as a skipped scan path).
+After PyPI trusted publishing is configured (see below):
 
 ```bash
-# Prepare a demo library (PowerShell)
-$demo = Join-Path $env:TEMP "madify-docs-qs"
-$dbdir = Join-Path $env:TEMP "madify-docs-db"
+uv tool install madify
+# or: pip install madify
+```
+
+## Quickstart
+
+Keep the catalog **outside** the media folder so the `.sqlite` file is not skipped as unsupported media.
+
+```bash
+# PowerShell demo layout
+$demo = Join-Path $env:TEMP "madify-demo"
+$dbdir = Join-Path $env:TEMP "madify-db"
 New-Item -ItemType Directory -Path $demo, $dbdir -Force | Out-Null
 Set-Content "$demo\a.jpg" "x"
 Set-Content "$demo\b.psd" "x"
@@ -55,132 +58,67 @@ Set-Content "$demo\readme.txt" "skip"
 $db = Join-Path $dbdir "catalog.sqlite"
 ```
 
-**Version**
-
-```bash
-uv run madify
-```
-
-```text
-Madify 0.1.0
-```
-
-**Scan**
-
 ```bash
 uv run madify --db $db scan $demo
-```
-
-```text
-scan complete: added=3 updated=0 skipped=1
-  + id=1 [image] C:\Users\scott\AppData\Local\Temp\madify-docs-qs\a.jpg
-  + id=2 [psd] C:\Users\scott\AppData\Local\Temp\madify-docs-qs\b.psd
-  + id=3 [video] C:\Users\scott\AppData\Local\Temp\madify-docs-qs\c.mp4
-```
-
-**Tag**
-
-```bash
-uv run madify --db $db tag --id 1 --title "Clip One" --description "demo shot" --tag demo --tag photo
-```
-
-```text
-tagged id=1 title='Clip One' description='demo shot' tags=[demo,photo]
-```
-
-**Rename**
-
-```bash
+uv run madify --db $db tag --id 1 --title "Clip One" --tag demo --tag photo
+uv run madify --db $db list
+uv run madify --db $db search --query clip
 uv run madify --db $db rename --id 1
 ```
 
-```text
-rename complete: renamed=1 unchanged=0
-  -> id=1 C:\Users\scott\AppData\Local\Temp\madify-docs-qs\Clip_One.jpg
-```
+## Commands
 
-After rename, `$demo` contained: `b.psd`, `c.mp4`, `Clip_One.jpg`, `readme.txt`.
+| Command | Purpose |
+|---------|---------|
+| `madify scan <dir>` | Upsert supported media under `<dir>` |
+| `madify tag --id N \| --path P` | Set title/description/tags (+ XMP sidecar) |
+| `madify rename [--id N]` | Rename from titles |
+| `madify list` | List all assets |
+| `madify search [--query Q] [--tag T]` | Filter assets |
 
-**Help**
-
-```bash
-uv run madify --help
-```
-
-```text
-usage: madify [-h] [--db DB] {scan,tag,rename} ...
-
-Photo cataloguer and metadata assistant.
-
-positional arguments:
-  {scan,tag,rename}
-    scan             Scan a directory into the catalog
-    tag              Set title, description, and/or tags
-    rename           Rename files from their catalog titles
-
-options:
-  -h, --help         show this help message and exit
-  --db DB            SQLite catalog path (default: madify.sqlite)
-```
-
-Global option `--db` defaults to `madify.sqlite` in the current working directory.
+Global: `--db PATH` (default `madify.sqlite`).
 
 ## Architecture
 
-Core use cases take narrow ports (`Clock`, `FileSystem`, `CatalogStore`). Adapters implement those ports for production; tests inject fakes.
-
 | Module | Role |
 |--------|------|
-| `madify/__init__.py` | Package version + CLI entry (`main`) |
-| `madify/__main__.py` | `python -m madify` |
-| `madify/cli.py` | Argparse wiring for `scan` / `tag` / `rename` |
-| `madify/models.py` | Domain value types (`MediaAsset`, results, `TagRequest`) |
-| `madify/errors.py` | Explicit domain/application error types |
-| `madify/media_kinds.py` | Extension → image / PSD / video |
-| `madify/tagging.py` | Normalize/validate title, description, tags |
-| `madify/naming.py` | Title → safe filename + collision allocation |
-| `madify/ports.py` | `Clock` / `FileSystem` / `CatalogStore` protocols |
-| `madify/scan.py` | Scan use case |
-| `madify/tag_asset.py` | Tag use case |
-| `madify/rename_assets.py` | Rename use case |
-| `madify/sqlite_catalog.py` | SQLite `CatalogStore` adapter |
-| `madify/local_fs.py` | Local filesystem adapter |
-| `madify/system_clock.py` | UTC system clock adapter |
+| `cli.py` | Argparse wiring |
+| `models.py` / `errors.py` | Domain types and errors |
+| `media_kinds.py` | Extension → image / PSD / video |
+| `tagging.py` | Normalize/validate; tag merge/replace |
+| `naming.py` | Title → filename + collisions |
+| `ports.py` | Clock / FS / Catalog / MetadataWriter protocols |
+| `scan.py` / `tag_asset.py` / `rename_assets.py` | Use cases |
+| `query.py` | List / search filters |
+| `xmp_sidecar.py` | XMP sidecar writer |
+| `sqlite_catalog.py` / `local_fs.py` / `system_clock.py` | Adapters |
 
 ## Development
 
 ```bash
 uv sync --group dev
+uv run pre-commit install
 uv build
 uv run ruff check .
 uv run ruff format --check .
-uv run pytest -q
 uv run pytest -q --cov=madify --cov-report=term-missing
 uv run pdoc madify -d google -o docs/api
 ```
 
-Verified (this checkout):
+API HTML lands in `docs/api/` (gitignored).
 
-```text
-Building source distribution (uv build backend)...
-Building wheel from source distribution (uv build backend)...
-Successfully built dist\madify-0.1.0.tar.gz
-Successfully built dist\madify-0.1.0-py3-none-any.whl
-```
+See [CHANGELOG.md](CHANGELOG.md), [SECURITY.md](SECURITY.md), and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
-```text
-All checks passed!
-24 files already formatted
-......................................................................   [100%]
-70 passed in 0.31s
-```
+### PyPI trusted publishing (one-time, manual)
 
-```text
-# uv run pdoc madify -d google -o docs/api
-# exit code 0, no warnings printed; writes docs/api/index.html and module pages
-```
-
-API HTML lands in `docs/api/` (gitignored generated output).
+1. Create a PyPI project named `madify` (or claim the name).
+2. On PyPI → Publishing → add a trusted publisher:
+   - Owner: `scottmills306`
+   - Repository: `Madify`
+   - Workflow: `publish.yml`
+   - Environment: `pypi`
+3. On GitHub → Settings → Environments → create **`pypi`** (optional protection rules).
+4. Publish a GitHub Release — the Publish workflow uploads wheels via OIDC (no API token).
 
 ## License
 
