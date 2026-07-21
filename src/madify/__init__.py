@@ -6,12 +6,29 @@ otherwise it delegates to :func:`madify.cli.run_cli`.
 
 from __future__ import annotations
 
+import os
 import sys
 from importlib.metadata import version
 
 from madify.cli import run_cli
 
 __version__ = version("madify")
+
+
+def _init_sentry() -> None:
+    """Optional error reporting when SENTRY_DSN is set."""
+    dsn = os.environ.get("SENTRY_DSN", "").strip()
+    if not dsn:
+        return
+    try:
+        import sentry_sdk  # noqa: PLC0415
+    except ImportError:
+        return
+    sentry_sdk.init(
+        dsn=dsn,
+        environment=os.environ.get("ENVIRONMENT", "development"),
+        traces_sample_rate=0.0,
+    )
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -21,6 +38,7 @@ def main(argv: list[str] | None = None) -> None:
         argv: Argument list without the program name. When ``None``, uses
             ``sys.argv[1:]``.
     """
+    _init_sentry()
     if argv is None:
         argv = sys.argv[1:]
     if not argv:
