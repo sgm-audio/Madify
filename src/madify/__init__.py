@@ -21,7 +21,7 @@ def _init_sentry() -> None:
     if not dsn:
         return
     try:
-        import sentry_sdk
+        import sentry_sdk  # noqa: PLC0415
     except ImportError:
         return
     sentry_sdk.init(
