@@ -7,14 +7,14 @@ are supplied by callers through the :class:`~madify.ports.Clock` port.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from datetime import datetime
 
 
-class MediaKind(str, Enum):
+class MediaKind(StrEnum):
     """Coarse media classification used for cataloguing and reporting."""
 
     IMAGE = "image"
