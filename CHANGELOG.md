@@ -27,6 +27,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Injectable Clock / FileSystem / CatalogStore ports and unit tests
 - GitHub Actions CI (format, lint, test)
 
-[Unreleased]: https://github.com/scottmills306/Madify/compare/v0.2.0...HEAD
-[0.2.0]: https://github.com/scottmills306/Madify/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/scottmills306/Madify/releases/tag/v0.1.0
+[Unreleased]: https://github.com/sgm-audio/Madify/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/sgm-audio/Madify/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/sgm-audio/Madify/releases/tag/v0.1.0
