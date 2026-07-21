@@ -1,6 +1,10 @@
 # Madify
 
-[![CI](https://github.com/scottmills306/Madify/actions/workflows/ci.yml/badge.svg)](https://github.com/scottmills306/Madify/actions/workflows/ci.yml)
+[![CI](https://github.com/scottmills306/Madify/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/scottmills306/Madify/actions/workflows/ci.yml)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
 Madify is a local CLI that catalogues photo, PSD, and video files in SQLite, lets you set titles/descriptions/tags, and renames files from those titles. Metadata lives in the catalog today (file embed/sidecars are planned); the core stays free of direct filesystem/DB/clock access so it stays unit-testable.
 
@@ -15,8 +19,6 @@ Madify is a local CLI that catalogues photo, PSD, and video files in SQLite, let
 ## Install
 
 Requires **Python ≥ 3.12** and [uv](https://docs.astral.sh/uv/).
-
-Clone the private repository (you need access), then sync:
 
 ```bash
 git clone https://github.com/scottmills306/Madify.git
@@ -36,7 +38,6 @@ uv run madify
 ```text
 Madify 0.1.0
 ```
-
 ## Quickstart
 
 Commands below were run on Windows with a temp media folder and a catalog **outside** that folder (so the `.sqlite` file is not counted as a skipped scan path).
