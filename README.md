@@ -34,7 +34,7 @@ uv run madify
 ```
 
 ```text
-Madify 0.2.0
+Madify 0.2.1
 ```
 
 After PyPI trusted publishing is configured (see below):

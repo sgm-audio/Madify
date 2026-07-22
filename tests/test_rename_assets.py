@@ -159,3 +159,55 @@ def test_rename_errors_if_destination_exists_on_fs() -> None:
     trap = ExistsTrap(directories=set(fs.directories), files=set(fs.files))
     with pytest.raises(RenameError, match="destination already exists"):
         rename_assets(catalog=catalog, fs=trap, clock=FakeClock(), asset_id=1)
+
+
+def test_rename_moves_sibling_xmp_sidecar() -> None:
+    """Media rename also renames a same-stem ``.xmp`` sidecar when present."""
+    fs = FakeFileSystem()
+    fs.add_dir(_p("/library"))
+    fs.add_file(_p("/library/foo.jpg"))
+    fs.add_file(_p("/library/foo.xmp"))
+    catalog = InMemoryCatalog()
+    catalog.seed(_asset(1, _p("/library/foo.jpg"), "Golden Hour"))
+
+    result = rename_assets(catalog=catalog, fs=fs, clock=FakeClock(), asset_id=1)
+
+    assert result.renamed[0].path == _p("/library/Golden_Hour.jpg")
+    assert _p("/library/Golden_Hour.jpg") in fs.files
+    assert _p("/library/Golden_Hour.xmp") in fs.files
+    assert _p("/library/foo.jpg") not in fs.files
+    assert _p("/library/foo.xmp") not in fs.files
+    # Catalog stores media path only — sidecar is filesystem-only.
+    assert catalog.get_by_id(1) is not None
+    assert catalog.get_by_id(1).path == _p("/library/Golden_Hour.jpg")  # type: ignore[union-attr]
+
+
+def test_rename_without_sidecar_is_unchanged_happy_path() -> None:
+    fs = FakeFileSystem()
+    fs.add_dir(_p("/library"))
+    fs.add_file(_p("/library/foo.jpg"))
+    catalog = InMemoryCatalog()
+    catalog.seed(_asset(1, _p("/library/foo.jpg"), "Golden Hour"))
+
+    result = rename_assets(catalog=catalog, fs=fs, clock=FakeClock(), asset_id=1)
+
+    assert result.renamed[0].path == _p("/library/Golden_Hour.jpg")
+    assert _p("/library/Golden_Hour.xmp") not in fs.files
+
+
+def test_rename_skips_sidecar_when_target_xmp_exists() -> None:
+    """Do not clobber an existing destination ``.xmp``; leave the old sidecar."""
+    fs = FakeFileSystem()
+    fs.add_dir(_p("/library"))
+    fs.add_file(_p("/library/foo.jpg"))
+    fs.add_file(_p("/library/foo.xmp"))
+    fs.add_file(_p("/library/Golden_Hour.xmp"))  # pre-existing target
+    catalog = InMemoryCatalog()
+    catalog.seed(_asset(1, _p("/library/foo.jpg"), "Golden Hour"))
+
+    result = rename_assets(catalog=catalog, fs=fs, clock=FakeClock(), asset_id=1)
+
+    assert result.renamed[0].path == _p("/library/Golden_Hour.jpg")
+    assert _p("/library/Golden_Hour.jpg") in fs.files
+    assert _p("/library/Golden_Hour.xmp") in fs.files
+    assert _p("/library/foo.xmp") in fs.files  # left in place; not clobbered target

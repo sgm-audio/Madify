@@ -9,7 +9,7 @@ from madify import __version__, main
 
 def test_version_matches_package_metadata() -> None:
     assert __version__ == version("madify")
-    assert __version__ == "0.2.0"
+    assert __version__ == "0.2.1"
 
 
 def test_main_prints_app_name_and_version(
