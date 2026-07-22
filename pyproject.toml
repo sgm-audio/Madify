@@ -1,6 +1,6 @@
 [project]
 name = "madify"
-version = "0.2.0"
+version = "0.2.1"
 description = "Photo cataloguer and metadata assistant."
 readme = "README.md"
 license = "MIT"

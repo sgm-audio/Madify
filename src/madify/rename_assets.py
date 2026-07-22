@@ -3,6 +3,9 @@
 Bulk rename skips untitled assets. Renaming a single ``asset_id`` without a
 title raises :class:`~madify.errors.RenameError`. Destination collisions with
 neighbors or other catalogued paths get ``_2``, ``_3``, … suffixes.
+
+Sibling ``.xmp`` sidecars move with the media when present; an existing target
+sidecar is left alone (never clobbered).
 """
 
 from __future__ import annotations
@@ -13,6 +16,7 @@ from typing import TYPE_CHECKING
 from madify.errors import AssetNotFoundError, RenameError
 from madify.models import MediaAsset, RenameResult
 from madify.naming import allocate_unique_path, proposed_path
+from madify.xmp_sidecar import sidecar_path_for
 
 if TYPE_CHECKING:
     from madify.ports import CatalogStore, Clock, FileSystem
@@ -129,7 +133,36 @@ def _rename_one(
 
     updated = catalog.update_path(asset.id, destination, now=clock.now())
     taken.add(destination.casefold())
+    _rename_sidecar_if_present(fs, asset.path, destination, taken=taken)
     return updated
+
+
+def _rename_sidecar_if_present(
+    fs: FileSystem,
+    source_media: str,
+    destination_media: str,
+    *,
+    taken: set[str],
+) -> None:
+    """Rename sibling ``.xmp`` with the media when safe; no-op otherwise."""
+    old_sidecar = sidecar_path_for(source_media)
+    new_sidecar = sidecar_path_for(destination_media)
+    if not fs.exists(old_sidecar):
+        return
+    if old_sidecar.casefold() == new_sidecar.casefold():
+        return
+    if fs.exists(new_sidecar):
+        # Don't clobber an existing target sidecar.
+        return
+
+    try:
+        fs.rename(old_sidecar, new_sidecar)
+    except OSError as exc:
+        message = f"failed to rename sidecar {old_sidecar} -> {new_sidecar}: {exc}"
+        raise RenameError(message) from exc
+
+    taken.discard(old_sidecar.casefold())
+    taken.add(new_sidecar.casefold())
 
 
 def _existing_neighbor_paths(assets: list[MediaAsset], fs: FileSystem) -> list[str]:
