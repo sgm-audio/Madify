@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `rename` now previews its plan by default (`--dry-run`); files move only
+  with an explicit `--yes` (documented safe mode)
+- `untag` command to remove tags (and optionally title/description)
+- Tests for Windows-style paths and Unicode filenames, corrupt databases, and
+  the installed `madify` console entry point
+- CI matrix runs format/lint/test on Python 3.12 and 3.13
+
+### Changed
+
+- README documents the tool's beta maturity and rename safety model
+
 ## [0.2.1] - 2026-07-22
 
 ### Fixed

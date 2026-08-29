@@ -14,7 +14,7 @@ from madify.errors import (
     MetadataWriteError,
 )
 from madify.models import MediaAsset, MediaKind, MediaMetadata, TagRequest
-from madify.tag_asset import tag_asset
+from madify.tag_asset import tag_asset, tag_many
 from madify.xmp_sidecar import XmpSidecarWriter
 
 
@@ -169,4 +169,118 @@ def test_tag_propagates_validation_error() -> None:
             clock=FakeClock(),
             asset_id=1,
             request=TagRequest(),
+        )
+
+
+def _seed_bulk(
+    catalog: InMemoryCatalog,
+    *,
+    asset_id: int = 1,
+    path: str = "/library/clip-one.jpg",
+    kind: MediaKind = MediaKind.IMAGE,
+    metadata: MediaMetadata | None = None,
+) -> MediaAsset:
+    now = datetime(2026, 1, 1, tzinfo=UTC)
+    return catalog.seed(
+        MediaAsset(
+            id=asset_id,
+            path=_p(path),
+            kind=kind,
+            metadata=metadata or MediaMetadata(),
+            created_at=now,
+            updated_at=now,
+        ),
+    )
+
+
+def test_tag_many_requires_something_to_do() -> None:
+    with pytest.raises(MetadataValidationError, match="at least one"):
+        tag_many(InMemoryCatalog(), FakeClock(), TagRequest())
+
+
+def test_tag_many_auto_titles_and_tags_from_stem() -> None:
+    catalog = InMemoryCatalog()
+    _seed_bulk(catalog)
+    updated = tag_many(catalog, FakeClock(), TagRequest(), auto=True)
+    assert len(updated) == 1
+    asset = updated[0]
+    assert asset.metadata.title == "clip-one"
+    assert "jpg" in asset.metadata.tags
+    assert "clip" in asset.metadata.tags
+    assert "one" in asset.metadata.tags
+
+
+def test_tag_many_auto_skips_noise_tokens() -> None:
+    catalog = InMemoryCatalog()
+    _seed_bulk(catalog, path="/library/img_2026_photo.jpg")
+    asset = tag_many(catalog, FakeClock(), TagRequest(), auto=True)[0]
+    assert asset.metadata.tags == ("jpg",)
+
+
+def test_tag_many_auto_keeps_existing_title() -> None:
+    catalog = InMemoryCatalog()
+    _seed_bulk(catalog, metadata=MediaMetadata(title="Old", tags=("x",)))
+    asset = tag_many(catalog, FakeClock(), TagRequest(), auto=True)[0]
+    assert asset.metadata.title == "Old"
+    assert asset.metadata.tags == ("x", "jpg", "clip", "one")
+
+
+def test_tag_many_merges_tags_by_default() -> None:
+    catalog = InMemoryCatalog()
+    _seed_bulk(catalog, metadata=MediaMetadata(tags=("x",)))
+    asset = tag_many(catalog, FakeClock(), TagRequest(tags=["z"]))[0]
+    assert asset.metadata.tags == ("x", "z")
+
+
+def test_tag_many_respects_kind_filter() -> None:
+    catalog = InMemoryCatalog()
+    _seed_bulk(catalog, asset_id=1)
+    _seed_bulk(
+        catalog,
+        asset_id=2,
+        path="/library/b.mp4",
+        kind=MediaKind.VIDEO,
+        metadata=MediaMetadata(tags=("y",)),
+    )
+    updated = tag_many(
+        catalog,
+        FakeClock(),
+        TagRequest(tags=["z"]),
+        kind=MediaKind.VIDEO,
+    )
+    assert [a.id for a in updated] == [2]
+    assert catalog.get_by_id(1).metadata.tags == ()
+    assert updated[0].metadata.tags == ("y", "z")
+
+
+def test_tag_many_writes_sidecar(tmp_path: Path) -> None:
+    media = tmp_path / "clip.jpg"
+    media.write_bytes(b"x")
+    catalog = InMemoryCatalog()
+    _seed_bulk(catalog, path=str(media))
+    tag_many(
+        catalog,
+        FakeClock(),
+        TagRequest(),
+        auto=True,
+        metadata_writer=XmpSidecarWriter(),
+    )
+    assert (tmp_path / "clip.xmp").is_file()
+
+
+def test_tag_many_sidecar_oserror_wraps() -> None:
+    class Boom:
+        def write(self, path: str, metadata: MediaMetadata) -> None:
+            del path, metadata
+            message = "disk full"
+            raise OSError(message)
+
+    catalog = InMemoryCatalog()
+    _seed_bulk(catalog)
+    with pytest.raises(MetadataWriteError, match="failed to write metadata"):
+        tag_many(
+            catalog,
+            FakeClock(),
+            TagRequest(tags=["z"]),
+            metadata_writer=Boom(),  # type: ignore[arg-type]
         )

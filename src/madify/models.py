@@ -105,3 +105,19 @@ class TagRequest:
     description: str | None = None
     tags: list[str] | None = None
     replace_tags: bool = False
+
+
+@dataclass(frozen=True, slots=True)
+class UntagRequest:
+    """Which metadata fields to clear on one or more assets.
+
+    Attributes:
+        tags: Specific tags to remove (casefold-insensitive). An empty tuple
+            removes **all** tags.
+        clear_title: When True, also clear the title.
+        clear_description: When True, also clear the description.
+    """
+
+    tags: tuple[str, ...] = ()
+    clear_title: bool = False
+    clear_description: bool = False

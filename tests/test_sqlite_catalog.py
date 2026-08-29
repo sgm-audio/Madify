@@ -138,3 +138,32 @@ def test_sqlite_creates_parent_dirs(tmp_path: Path) -> None:
         assert Path(db).is_file()
     finally:
         catalog.close()
+
+
+def test_sqlite_corrupt_database_file_raises_useful_error(tmp_path: Path) -> None:
+    """A non-SQLite file at the db path fails with a clear CatalogError."""
+    db = tmp_path / "not_a_db.sqlite"
+    db.write_text("this is not a sqlite database", encoding="utf-8")
+    with pytest.raises(CatalogError, match="failed to open catalog"):
+        SqliteCatalog(str(db))
+
+
+def test_sqlite_unicode_roundtrip(tmp_path: Path) -> None:
+    """Unicode paths and metadata survive a catalog roundtrip."""
+    catalog = SqliteCatalog(str(tmp_path / "c.sqlite"))
+    try:
+        asset, _ = catalog.upsert_scanned(
+            str(tmp_path / "café.jpg"),
+            MediaKind.IMAGE,
+            now=_now(),
+        )
+        meta = MediaMetadata(title="日本語の写真", tags=("café", "旅行"))
+        tagged = catalog.update_metadata(asset.id, meta, now=_now())
+        reloaded = catalog.get_by_id(asset.id)
+        assert reloaded is not None
+        assert reloaded.path == str(tmp_path / "café.jpg")
+        assert reloaded.metadata.title == "日本語の写真"
+        assert reloaded.metadata.tags == ("café", "旅行")
+        assert tagged == reloaded
+    finally:
+        catalog.close()

@@ -8,9 +8,50 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from madify.errors import AssetNotFoundError
+
 if TYPE_CHECKING:
     from madify.models import MediaAsset
     from madify.ports import CatalogStore
+
+
+def resolve_asset(
+    catalog: CatalogStore,
+    *,
+    asset_id: int | None = None,
+    path: str | None = None,
+) -> MediaAsset:
+    """Load an asset by exactly one of ``asset_id`` or ``path``.
+
+    Args:
+        catalog: Catalog store port.
+        asset_id: Catalog id (mutually exclusive with ``path``).
+        path: Absolute asset path (mutually exclusive with ``asset_id``).
+
+    Returns:
+        The requested :class:`~madify.models.MediaAsset`.
+
+    Raises:
+        AssetNotFoundError: Both or neither selector was given, or the asset
+            does not exist.
+    """
+    if asset_id is None and path is None:
+        message = "provide asset id or path (or use --all)"
+        raise AssetNotFoundError(message)
+    if asset_id is not None and path is not None:
+        message = "provide asset id or path, not both"
+        raise AssetNotFoundError(message)
+
+    asset = (
+        catalog.get_by_id(asset_id)
+        if asset_id is not None
+        else catalog.get_by_path(path or "")
+    )
+    if asset is None:
+        target = f"id={asset_id}" if asset_id is not None else f"path={path}"
+        message = f"asset not found: {target}"
+        raise AssetNotFoundError(message)
+    return asset
 
 
 def list_catalog(catalog: CatalogStore) -> list[MediaAsset]:

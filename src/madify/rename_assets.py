@@ -10,6 +10,7 @@ sidecar is left alone (never clobbered).
 
 from __future__ import annotations
 
+from dataclasses import replace
 from pathlib import PurePath
 from typing import TYPE_CHECKING
 
@@ -28,8 +29,13 @@ def rename_assets(
     fs: FileSystem,
     clock: Clock,
     asset_id: int | None = None,
+    dry_run: bool = False,
 ) -> RenameResult:
     """Rename one asset or every titled asset in the catalog.
+
+    ``dry_run=True`` computes the full rename plan (including collision
+    suffixes) without touching the filesystem or catalog. ``renamed`` then
+    holds assets carrying their *proposed* destination paths.
 
     Args:
         catalog: Catalog store port.
@@ -37,6 +43,8 @@ def rename_assets(
         clock: Clock port for ``updated_at`` after a successful move.
         asset_id: When set, only that asset is considered; when ``None``,
             all catalogued assets are considered.
+        dry_run: When True, plan renames but perform no filesystem or catalog
+            writes.
 
     Returns:
         Renamed and unchanged asset collections.
@@ -61,6 +69,7 @@ def rename_assets(
             fs=fs,
             clock=clock,
             taken=taken,
+            dry_run=dry_run,
         )
         if outcome is None:
             unchanged.append(asset)
@@ -98,13 +107,14 @@ def _build_taken_paths(
     return taken
 
 
-def _rename_one(
+def _rename_one(  # noqa: PLR0913
     asset: MediaAsset,
     *,
     catalog: CatalogStore,
     fs: FileSystem,
     clock: Clock,
     taken: set[str],
+    dry_run: bool,
 ) -> MediaAsset | None:
     """Rename a single titled asset; return ``None`` when unchanged."""
     if not asset.metadata.title.strip():
@@ -119,6 +129,10 @@ def _rename_one(
     if destination.casefold() == asset.path.casefold():
         taken.add(asset.path.casefold())
         return None
+
+    if dry_run:
+        taken.add(destination.casefold())
+        return replace(asset, path=destination)
 
     if fs.exists(destination):
         message = f"destination already exists: {destination}"

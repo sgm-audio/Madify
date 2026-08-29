@@ -211,3 +211,46 @@ def test_rename_skips_sidecar_when_target_xmp_exists() -> None:
     assert _p("/library/Golden_Hour.jpg") in fs.files
     assert _p("/library/Golden_Hour.xmp") in fs.files
     assert _p("/library/foo.xmp") in fs.files  # left in place; not clobbered target
+
+
+def test_rename_dry_run_plans_without_touching_files() -> None:
+    """Dry-run reports proposed destinations but changes nothing on disk/catalog."""
+    fs = FakeFileSystem()
+    fs.add_dir(_p("/library"))
+    fs.add_file(_p("/library/a.jpg"))
+    catalog = InMemoryCatalog()
+    catalog.seed(_asset(1, _p("/library/a.jpg"), "Clip One"))
+
+    result = rename_assets(
+        catalog=catalog,
+        fs=fs,
+        clock=FakeClock(),
+        asset_id=1,
+        dry_run=True,
+    )
+
+    assert result.renamed[0].path == _p("/library/Clip_One.jpg")
+    assert _p("/library/a.jpg") in fs.files
+    assert _p("/library/Clip_One.jpg") not in fs.files
+    assert catalog.get_by_id(1) is not None
+    assert catalog.get_by_id(1).path == _p("/library/a.jpg")  # type: ignore[union-attr]
+
+
+def test_rename_dry_run_collision_suffixes_are_deterministic() -> None:
+    """Dry-run and real-run produce the same collision suffixes."""
+    fs = FakeFileSystem()
+    fs.add_dir(_p("/library"))
+    fs.add_file(_p("/library/a.jpg"))
+    fs.add_file(_p("/library/Clip_One.jpg"))
+    catalog = InMemoryCatalog()
+    catalog.seed(_asset(1, _p("/library/a.jpg"), "Clip One"))
+
+    plan = rename_assets(
+        catalog=catalog,
+        fs=fs,
+        clock=FakeClock(),
+        asset_id=1,
+        dry_run=True,
+    )
+    assert plan.renamed[0].path == _p("/library/Clip_One_2.jpg")
+    assert _p("/library/Clip_One_2.jpg") not in fs.files

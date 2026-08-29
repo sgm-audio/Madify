@@ -46,39 +46,87 @@ uv tool install madify
 
 ## Quickstart
 
-Keep the catalog **outside** the media folder so the `.sqlite` file is not skipped as unsupported media.
+The catalog is stored at `./madify.sqlite` (override with `--db`). Commands
+default to the **current folder**, so the most common workflow is:
 
 ```bash
-# PowerShell demo layout
-$demo = Join-Path $env:TEMP "madify-demo"
-$dbdir = Join-Path $env:TEMP "madify-db"
-New-Item -ItemType Directory -Path $demo, $dbdir -Force | Out-Null
-Set-Content "$demo\a.jpg" "x"
-Set-Content "$demo\b.psd" "x"
-Set-Content "$demo\c.mp4" "x"
-Set-Content "$demo\readme.txt" "skip"
-$db = Join-Path $dbdir "catalog.sqlite"
+cd /your/photos
+madify scan                  # scan the current folder
+madify tag --all --auto      # auto-title from filename + add extension tag
+madify tag --all --tag archive --tag 2026
+madify list                  # see what got catalogued
+madify rename --yes          # rename files from their titles
 ```
 
+That's it. No `uv run`, no `--db`, no paths to type.
+
+## Install
+
+Pick one:
+
 ```bash
-uv run madify --db $db scan $demo
-uv run madify --db $db tag --id 1 --title "Clip One" --tag demo --tag photo
-uv run madify --db $db list
-uv run madify --db $db search --query clip
-uv run madify --db $db rename --id 1
+# A) use the venv already in this repo
+.venv\Scripts\madify.exe
+
+# B) install as a tool (then `madify` is on your PATH)
+uv tool install .
+
+# C) dev install from source
+uv sync --group dev
+uv run madify
 ```
 
 ## Commands
 
 | Command | Purpose |
 |---------|---------|
-| `madify scan <dir>` | Upsert supported media under `<dir>` |
+| `madify scan [dir]` | Upsert supported media (default: current folder) |
 | `madify tag --id N \| --path P` | Set title/description/tags (+ XMP sidecar) |
-| `madify rename [--id N]` | Rename from titles |
+| `madify tag --all [--auto] [--title T] [--tag X]` | Apply to every asset |
+| `madify tag --all --kind image` | Apply to images only |
+| `madify untag --all [--tag X] [--title] [--description]` | Remove tags |
+| `madify rename [--id N] [--yes]` | Rename from titles (previews unless `--yes`) |
 | `madify list` | List all assets |
 | `madify search [--query Q] [--tag T]` | Filter assets |
 
-Global: `--db PATH` (default `madify.sqlite`).
+Global: `--db PATH` (default `madify.sqlite` in cwd).
+
+> Keep the `.sqlite` **outside** the media folder you scan, or the catalog
+> file itself gets treated as media on subsequent scans.
+
+## Safety
+
+`rename` moves files on disk, so it **previews by default** and changes
+nothing until you pass `--yes`:
+
+```bash
+madify rename              # dry-run: print the plan, touch nothing
+madify rename --dry-run    # same, explicit
+madify rename --yes        # actually move files (and sibling .xmp sidecars)
+```
+
+`tag`/`untag` only ever create or overwrite the `.xmp` sidecar next to the
+media file (never the media itself); pass `--no-sidecar` to skip.
+
+## Maturity
+
+Madify is **beta software**, not production software. What is verified:
+
+- Clean `uv tool install` / wheel install on Python 3.12 and 3.13 (CI-tested).
+- The `madify` console entry point, `scan`, `tag`, `untag`, `rename`, `list`,
+  and `search` work end-to-end from an installed package.
+- SQLite indexing, XMP sidecar write-back, deterministic rename/collision
+  handling, and Windows/Unicode path handling are unit-tested (≥85% coverage).
+
+What is **not** yet verified and should not be assumed:
+
+- No PyPI release exists yet (trusted publishing is configured but unclaimed).
+- `rename --yes` has not been exercised against a large, real media library;
+  back up files before bulk-renaming.
+- XMP sidecars are written with a stdlib XML writer; they have not been
+  validated in Lightroom/Photoshop.
+- Classification is extension-only; corrupt media bytes are catalogued, not
+  detected.
 
 ## Architecture
 

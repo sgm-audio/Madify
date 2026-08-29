@@ -48,3 +48,6 @@ uv.toml.local
 # Local catalogs
 *.sqlite
 *.sqlite-journal
+
+# Stale nested clone (see AGENTS.md)
+Madify-sentry-fix/

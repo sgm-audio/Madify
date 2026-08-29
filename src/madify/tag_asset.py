@@ -7,14 +7,22 @@ writes an XMP sidecar through :class:`~madify.ports.MetadataWriter`.
 
 from __future__ import annotations
 
+import re
+from pathlib import PurePath
 from typing import TYPE_CHECKING
 
-from madify.errors import AssetNotFoundError, MetadataWriteError
+from madify.errors import MetadataValidationError
+from madify.models import TagRequest
+from madify.ports import write_metadata
+from madify.query import resolve_asset
 from madify.tagging import build_metadata
 
 if TYPE_CHECKING:
-    from madify.models import MediaAsset, TagRequest
+    from madify.models import MediaAsset, MediaKind
     from madify.ports import CatalogStore, Clock, MetadataWriter
+
+_FILENAME_TOKEN_RE = re.compile(r"[A-Za-z0-9]+")
+_MIN_AUTO_TOKEN_LEN = 3
 
 
 def tag_asset(  # noqa: PLR0913
@@ -46,7 +54,7 @@ def tag_asset(  # noqa: PLR0913
         MetadataValidationError: Request fails validation (from tagging).
         MetadataWriteError: Sidecar/file write failed after catalog update.
     """
-    asset = _resolve_asset(catalog, asset_id=asset_id, path=path)
+    asset = resolve_asset(catalog, asset_id=asset_id, path=path)
     metadata = build_metadata(
         title=request.title,
         description=request.description,
@@ -55,36 +63,103 @@ def tag_asset(  # noqa: PLR0913
         replace_tags=request.replace_tags,
     )
     updated = catalog.update_metadata(asset.id, metadata, now=clock.now())
-    if metadata_writer is not None:
-        try:
-            metadata_writer.write(updated.path, updated.metadata)
-        except OSError as exc:
-            message = f"failed to write metadata for {updated.path}: {exc}"
-            raise MetadataWriteError(message) from exc
+    write_metadata(metadata_writer, updated.path, updated.metadata)
     return updated
 
 
-def _resolve_asset(
+def tag_many(  # noqa: PLR0913
     catalog: CatalogStore,
+    clock: Clock,
+    request: TagRequest,
     *,
-    asset_id: int | None,
-    path: str | None,
-) -> MediaAsset:
-    """Load an asset by exactly one of ``asset_id`` or ``path``."""
-    if asset_id is None and path is None:
-        message = "provide asset id or path"
-        raise AssetNotFoundError(message)
-    if asset_id is not None and path is not None:
-        message = "provide asset id or path, not both"
-        raise AssetNotFoundError(message)
+    kind: MediaKind | None = None,
+    auto: bool = False,
+    metadata_writer: MetadataWriter | None = None,
+) -> list[MediaAsset]:
+    """Apply ``request`` to every asset, optionally filtered by kind.
 
-    asset = (
-        catalog.get_by_id(asset_id)
-        if asset_id is not None
-        else catalog.get_by_path(path or "")
+    When ``auto`` is True and the request leaves the title unset, derive the
+    title from the filename stem. When the request leaves tags unset and
+    ``auto`` is True, add a tag for the file extension and any hyphen/underscore
+    tokens in the filename stem (deduped against the existing tag set).
+
+    Args:
+        catalog: Catalog store port.
+        clock: Clock port for ``updated_at``.
+        request: Partial metadata fields to apply.
+        kind: Optional :class:`~madify.models.MediaKind` filter.
+        auto: When True, fill in untitled title/tags from the filename.
+        metadata_writer: Optional writer for on-disk / sidecar metadata.
+
+    Returns:
+        Updated assets, in ascending id order.
+
+    Raises:
+        MetadataWriteError: Sidecar/file write failed after a catalog update.
+    """
+    if (
+        request.title is None
+        and request.description is None
+        and request.tags is None
+        and not auto
+    ):
+        message = "provide at least one of title, description, tags, or --auto"
+        raise MetadataValidationError(message)
+    updated_assets: list[MediaAsset] = []
+    for asset in catalog.list_assets():
+        if kind is not None and asset.kind != kind:
+            continue
+        effective = _effective_request(asset, request, auto=auto)
+        metadata = build_metadata(
+            title=effective.title,
+            description=effective.description,
+            tags=effective.tags,
+            base=asset.metadata,
+            replace_tags=effective.replace_tags,
+        )
+        next_asset = catalog.update_metadata(asset.id, metadata, now=clock.now())
+        write_metadata(metadata_writer, next_asset.path, next_asset.metadata)
+        updated_assets.append(next_asset)
+    return updated_assets
+
+
+def _effective_request(
+    asset: MediaAsset,
+    request: TagRequest,
+    *,
+    auto: bool,
+) -> TagRequest:
+    """Fill in untitled title/tags from ``asset.path`` when ``auto`` is True."""
+    if not auto:
+        return request
+    title = request.title
+    extra_tags: list[str] | None = request.tags
+    if title is None and not asset.metadata.title:
+        title = PurePath(asset.path).stem
+    derived = _auto_tags_for(asset)
+    extra_tags = derived if extra_tags is None else [*extra_tags, *derived]
+    return TagRequest(
+        title=title,
+        description=request.description,
+        tags=extra_tags,
+        replace_tags=request.replace_tags,
     )
-    if asset is None:
-        target = f"id={asset_id}" if asset_id is not None else f"path={path}"
-        message = f"asset not found: {target}"
-        raise AssetNotFoundError(message)
-    return asset
+
+
+def _auto_tags_for(asset: MediaAsset) -> list[str]:
+    """Derive a small tag set from a media path's extension and stem."""
+    path = PurePath(asset.path)
+    ext = path.suffix.lstrip(".").lower()
+    tags: list[str] = []
+    if ext:
+        tags.append(ext)
+    stem_tokens = _FILENAME_TOKEN_RE.findall(path.stem)
+    for token in stem_tokens:
+        if token.isdigit():
+            continue
+        if len(token) < _MIN_AUTO_TOKEN_LEN:
+            continue
+        if token.lower() in {ext.lower(), "img", "image", "photo", "video"}:
+            continue
+        tags.append(token.lower())
+    return tags

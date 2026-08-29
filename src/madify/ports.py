@@ -8,6 +8,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Protocol
 
+from madify.errors import MetadataWriteError
+
 if TYPE_CHECKING:
     from datetime import datetime
 
@@ -90,3 +92,31 @@ class MetadataWriter(Protocol):
         Raises:
             OSError: Underlying write failed.
         """
+
+
+def write_metadata(
+    writer: MetadataWriter | None,
+    path: str,
+    metadata: MediaMetadata,
+) -> None:
+    """Write ``metadata`` through ``writer``, wrapping OSError uniformly.
+
+    Shared by every use case that persists metadata after a catalog update, so
+    all of them surface the same :class:`~madify.errors.MetadataWriteError`
+    instead of leaking raw :class:`OSError`.
+
+    Args:
+        writer: Metadata writer port, or ``None`` to skip writing.
+        path: Media path the metadata belongs to (used in error messages).
+        metadata: Metadata to persist.
+
+    Raises:
+        MetadataWriteError: ``writer`` raised :class:`OSError`.
+    """
+    if writer is None:
+        return
+    try:
+        writer.write(path, metadata)
+    except OSError as exc:
+        message = f"failed to write metadata for {path}: {exc}"
+        raise MetadataWriteError(message) from exc
