@@ -14,7 +14,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `untag` command to remove tags (and optionally title/description)
 - Tests for Windows-style paths and Unicode filenames, corrupt databases, and
   the installed `madify` console entry point
-- CI matrix runs format/lint/test on Python 3.12 and 3.13
 
 ### Changed
 

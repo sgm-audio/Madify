@@ -112,7 +112,8 @@ media file (never the media itself); pass `--no-sidecar` to skip.
 
 Madify is **beta software**, not production software. What is verified:
 
-- Clean `uv tool install` / wheel install on Python 3.12 and 3.13 (CI-tested).
+- Clean `uv tool install` / wheel install on Python 3.12 (CI-tested); 3.13 is
+  supported per `requires-python`/classifiers but not CI-tested.
 - The `madify` console entry point, `scan`, `tag`, `untag`, `rename`, `list`,
   and `search` work end-to-end from an installed package.
 - SQLite indexing, XMP sidecar write-back, deterministic rename/collision

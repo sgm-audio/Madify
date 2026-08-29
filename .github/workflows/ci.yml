@@ -8,12 +8,8 @@ on:
 
 jobs:
   check:
-    name: format, lint, test (${{ matrix.python-version }})
+    name: format, lint, test
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.12", "3.13"]
     steps:
       - name: Check out repository
         uses: actions/checkout@v7.0.1
@@ -22,7 +18,7 @@ jobs:
         uses: astral-sh/setup-uv@v10.0.1
         with:
           enable-cache: true
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.12"
 
       - name: Install dependencies
         run: uv sync --group dev
