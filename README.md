@@ -4,9 +4,8 @@
 [![Release](https://img.shields.io/github/v/release/sgm-audio/Madify)](https://github.com/sgm-audio/Madify/releases/latest)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Coverage](https://img.shields.io/badge/coverage-%E2%89%A585%25-brightgreen)](https://github.com/sgm-audio/Madify/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/badge/coverage%20gate-%E2%89%A585%25-brightgreen)](https://github.com/sgm-audio/Madify/actions/workflows/ci.yml)
 [![Discussions](https://img.shields.io/badge/discussions-join-blue?logo=github)](https://github.com/sgm-audio/Madify/discussions)
-[![Sponsor](https://img.shields.io/github/sponsors/sgm-audio?style=flat&logo=GitHub-Sponsors)](https://github.com/sponsors/sgm-audio)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
