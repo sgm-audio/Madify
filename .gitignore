@@ -51,3 +51,10 @@ uv.toml.local
 
 # Stale nested clone (see AGENTS.md)
 Madify-sentry-fix/
+
+# Local tool and agent files
+graphify-out/
+AGENTS.md
+CLAUDE.md
+.claude/
+.cursor/
